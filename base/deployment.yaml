@@ -1,0 +1,150 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: devops-with-kubernetes-project-ss
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devops-with-kubernetes-project
+  template:
+    metadata:
+      labels:
+        app: devops-with-kubernetes-project
+    spec:
+      volumes:
+        - name: image-volume
+          persistentVolumeClaim:
+            claimName: the-project-v2-claim
+        - name: app-config-volume
+          configMap:
+            name: the-project-config-map
+      containers:
+        - name: devops-with-kubernetes-frontend
+          image: eetujukka/devops-with-kubernetes-frontend:1.3
+          resources:
+            requests:
+              cpu: 10m
+              memory: 96Mi
+            limits:
+              cpu: 200m
+              memory: 192Mi
+          command: ["sh", "-c"]
+          args:
+            - npm run preview -- --port ${PORT:-3000}
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config-map
+                  key: frontend.port
+          volumeMounts:
+            - name: image-volume
+              mountPath: /usr/src/app/files
+            - name: app-config-volume
+              mountPath: /app/dist/config
+              readOnly: true
+        - name: devops-with-kubernetes-backend
+          image: eetujukka/devops-with-kubernetes-backend:1.5
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config-map
+                  key: backend.port
+            - name: PGHOST
+              value: "127.0.0.1"
+            - name: PGPORT
+              value: "5432"
+            - name: PGDATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config-map
+                  key: postgres.database
+            - name: PGUSER
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config-map
+                  key: postgres.user
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: project-postgres-password
+                  key: POSTGRES_PASSWORD
+            - name: LOKI_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config-map
+                  key: loki.url
+            - name: LOKI_TENANT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config-map
+                  key: loki.tenantId
+            - name: LOKI_SERVICE_NAME
+              value: "the-project-backend"
+            - name: NATS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config-map
+                  key: nats.url
+            - name: NATS_TODO_CREATED_SUBJECT
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config-map
+                  key: nats.todoCreatedSubject
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: image-volume
+              mountPath: /usr/src/app/files
+        - name: the-project-postgres
+          image: postgres:18.4-alpine3.24
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config-map
+                  key: postgres.database
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: the-project-config-map
+                  key: postgres.user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: project-postgres-password
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: the-project-postgres-data-storage
+              mountPath: /var/lib/postgresql
+  volumeClaimTemplates:
+    - metadata:
+        name: the-project-postgres-data-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: standard-rwo
+        resources:
+          requests:
+            storage: 1Gi

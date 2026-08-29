@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-with-kubernetes-frontend-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: devops-with-kubernetes-project
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-with-kubernetes-backend-svc
+  annotations:
+    cloud.google.com/backend-config: '{"default":"the-project-backend-config"}'
+spec:
+  type: ClusterIP
+  selector:
+    app: devops-with-kubernetes-project
+  ports:
+    - port: 3001
+      protocol: TCP
+      targetPort: 3001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-with-kubernetes-postgres-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: devops-with-kubernetes-project
+  ports:
+    - name: postgres
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
