@@ -10,7 +10,7 @@ patches:
 images:
 - name: eetujukka/devops-with-kubernetes-backend
   newName: europe-north1-docker.pkg.dev/dwk-gke-504310/devops-with-kubernetes/devops-with-kubernetes-backend
-  newTag: 74c844c932e13ed9c91f8f2d8d8a1219db96633e
+  newTag: 4e73e7ef5a0ed939ae85399afa553a277c4f59e1
 - name: eetujukka/devops-with-kubernetes-frontend
   newName: europe-north1-docker.pkg.dev/dwk-gke-504310/devops-with-kubernetes/devops-with-kubernetes-frontend
-  newTag: 74c844c932e13ed9c91f8f2d8d8a1219db96633e
+  newTag: 4e73e7ef5a0ed939ae85399afa553a277c4f59e1
