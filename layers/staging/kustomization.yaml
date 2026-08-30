@@ -7,7 +7,7 @@ resources:
 images:
 - name: eetujukka/devops-with-kubernetes-backend
   newName: europe-north1-docker.pkg.dev/dwk-gke-504310/devops-with-kubernetes/devops-with-kubernetes-backend
-  newTag: 74c844c932e13ed9c91f8f2d8d8a1219db96633e
+  newTag: 1cee8bc6c58411e5e41a84feef956c0270cbe3fe
 - name: eetujukka/devops-with-kubernetes-frontend
   newName: europe-north1-docker.pkg.dev/dwk-gke-504310/devops-with-kubernetes/devops-with-kubernetes-frontend
-  newTag: 74c844c932e13ed9c91f8f2d8d8a1219db96633e
+  newTag: 1cee8bc6c58411e5e41a84feef956c0270cbe3fe
